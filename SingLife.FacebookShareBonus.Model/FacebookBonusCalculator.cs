@@ -19,64 +19,58 @@ namespace SingLife.FacebookShareBonus.Model
         // <returns> A <see cref="FacebookBonus"/> object.</returns>
         public FacebookBonus Calculate(FacebookBonusCalculationInput input)
         {
-            int countPolicies = 0;
-            FacebookBonus facebookBonus = new FacebookBonus();
             IEnumerable<Policy> policiesOfCustomer = input.PoliciesOfCustomer;
+            int numberOfPolicyBonus = policiesOfCustomer.Count();
+            FacebookBonus facebookBonus = new FacebookBonus();
+            facebookBonus.PolicyBonuses = new PolicyBonus[numberOfPolicyBonus];
             var bonusPercentage = input.Setting.BonusPercentage;
             var maxiumBonus = input.Setting.MaximumBonus;
+            policiesOfCustomer = SortPoliciesWithCondition(input, policiesOfCustomer);
+            int countPolicies = 0;
+
+            foreach (var policy in policiesOfCustomer)
+            {
+                PolicyBonus tempPolicyBonus = new PolicyBonus();
+                int temp = CalculatePoints(policy.Premium, bonusPercentage);
+
+                if (maxiumBonus <= facebookBonus.Total + temp && maxiumBonus > 0)
+                {
+                    temp = Convert.ToInt32(maxiumBonus) - facebookBonus.Total;
+                }
+
+                tempPolicyBonus.BonusInPoints = temp;
+                tempPolicyBonus.PolicyNumber = policy.PolicyNumber;
+                facebookBonus.PolicyBonuses[countPolicies] = tempPolicyBonus;
+                countPolicies++;
+            }
+
+            return facebookBonus;
+        }
+
+        private static IEnumerable<Policy> SortPoliciesWithCondition(FacebookBonusCalculationInput input, IEnumerable<Policy> policiesOfCustomer)
+        {
             IPolicySortService policySortService = new DescendingOrderOfPoliciesNumber();
             if (input.Setting.policySorter != null)
             {
                 policySortService = input.Setting.policySorter;
             }
             policiesOfCustomer = policySortService.Sort(policiesOfCustomer);
-            int numberOfPolicyBonus = policiesOfCustomer.Count();
-            facebookBonus.PolicyBonuses = new PolicyBonus[numberOfPolicyBonus];
-            foreach (var policy in policiesOfCustomer)
-            {
-                PolicyBonus tempPolicyBonus = new PolicyBonus();
-                int temp = CalculatePoints(policy.Premium, bonusPercentage);
-                if (maxiumBonus <= facebookBonus.Total + temp && maxiumBonus > 0)
-                {
-                    temp = Convert.ToInt32(maxiumBonus) - facebookBonus.Total;
-                }
-                tempPolicyBonus.BonusInPoints = temp;
-                tempPolicyBonus.PolicyNumber = policy.PolicyNumber;
-                facebookBonus.PolicyBonuses[countPolicies] = tempPolicyBonus;
-                countPolicies++;
-            }
-            return facebookBonus;
+            return policiesOfCustomer;
         }
 
-        internal bool IsTotalBiggerThanMaxiumBonus(int total, decimal maximumBonus)
-        {
-            if (total > maximumBonus)
-                return true;
-            return false;
-        }
-
-        internal int CalculatePoints(decimal premium, float bonusPercentage)
+        private int CalculatePoints(decimal premium, float bonusPercentage)
         {
             return ConverseFloatToInt(RoundDown(decimal.ToSingle(premium) * bonusPercentage / 100));
         }
 
-        internal int ConverseFloatToInt(float v)
+        private int ConverseFloatToInt(float v)
         {
             return (int)v;
         }
 
-        internal int RoundDown(float v)
+        private int RoundDown(float v)
         {
             return (int)Math.Floor(v);
-        }
-
-        public IEnumerable<Policy> SortsPoliciesStartDate(Policy[] policies)
-        {
-            IEnumerable<Policy> sortedPolicies = new Policy[policies.Length];
-            FacebookBonusSettings facebook = new FacebookBonusSettings();
-            facebook.policySorter = new AscendingOrderOfPoliciesStartDate();
-            sortedPolicies = facebook.policySorter.Sort(policies);
-            return sortedPolicies;
         }
     }
 }

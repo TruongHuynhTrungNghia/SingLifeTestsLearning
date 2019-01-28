@@ -66,7 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AscendingOrderOfPoliciesStartDateTests.cs" />
+    <Compile Include="FakeSortOrder.cs" />
     <Compile Include="FacebookBonusCalculatorTests.cs" />
     <Compile Include="DescendingOrderOfPoliciesNumberTests.cs" />
     <Compile Include="Program.cs" />
