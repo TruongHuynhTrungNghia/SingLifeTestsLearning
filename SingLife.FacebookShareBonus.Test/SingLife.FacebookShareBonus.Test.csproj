@@ -68,7 +68,6 @@
   <ItemGroup>
     <Compile Include="FakeSortOrder.cs" />
     <Compile Include="FacebookBonusCalculatorTests.cs" />
-    <Compile Include="DescendingOrderOfPoliciesNumberTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

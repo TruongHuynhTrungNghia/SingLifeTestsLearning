@@ -11,7 +11,7 @@ namespace SingLife.FacebookShareBonus.Test
         {
             // Arrange
             Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 100 };
-            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3 , policySorter = new FakeSortOrder()};
+            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
             FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
             {
                 PoliciesOfCustomer = new Policy[1] { firstPolicy },

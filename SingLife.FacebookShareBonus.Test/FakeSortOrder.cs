@@ -1,8 +1,6 @@
 ﻿using NUnit.Framework;
 using SingLife.FacebookShareBonus.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SingLife.FacebookShareBonus.Test
 {

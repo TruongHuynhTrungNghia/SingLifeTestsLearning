@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("SingLife.FacebookShareBonus.Test")]
@@ -19,40 +18,73 @@ namespace SingLife.FacebookShareBonus.Model
         // <returns> A <see cref="FacebookBonus"/> object.</returns>
         public FacebookBonus Calculate(FacebookBonusCalculationInput input)
         {
-            IEnumerable<Policy> policiesOfCustomer = input.PoliciesOfCustomer;
-            int numberOfPolicyBonus = policiesOfCustomer.Count();
-            FacebookBonus facebookBonus = new FacebookBonus();
-            facebookBonus.PolicyBonuses = new PolicyBonus[numberOfPolicyBonus];
-            var bonusPercentage = input.Setting.BonusPercentage;
-            var maxiumBonus = input.Setting.MaximumBonus;
-            policiesOfCustomer = SortPoliciesWithCondition(input, policiesOfCustomer);
-            int countPolicies = 0;
+            var inputPolicies = input.PoliciesOfCustomer;
+            var inputSettings = input.Setting;
 
-            foreach (var policy in policiesOfCustomer)
-            {
-                PolicyBonus tempPolicyBonus = new PolicyBonus();
-                int temp = CalculatePoints(policy.Premium, bonusPercentage);
-
-                if (maxiumBonus <= facebookBonus.Total + temp && maxiumBonus > 0)
-                {
-                    temp = Convert.ToInt32(maxiumBonus) - facebookBonus.Total;
-                }
-
-                tempPolicyBonus.BonusInPoints = temp;
-                tempPolicyBonus.PolicyNumber = policy.PolicyNumber;
-                facebookBonus.PolicyBonuses[countPolicies] = tempPolicyBonus;
-                countPolicies++;
-            }
+            var facebookBonus = new FacebookBonus();
+            facebookBonus = CalculateFacebookBonus(inputPolicies, inputSettings);
 
             return facebookBonus;
         }
 
-        private static IEnumerable<Policy> SortPoliciesWithCondition(FacebookBonusCalculationInput input, IEnumerable<Policy> policiesOfCustomer)
+        private FacebookBonus CalculateFacebookBonus(Policy[] inputPolicies, FacebookBonusSettings inputSettings)
+        {
+            var resultFacebookBonus = new FacebookBonus();
+            int inputPoliciesLength = inputPolicies.Length;
+            resultFacebookBonus.PolicyBonuses = new PolicyBonus[inputPoliciesLength];
+            resultFacebookBonus.PolicyBonuses = SetUpPolicyBonus(inputPolicies, inputSettings);
+
+            return resultFacebookBonus;
+        }
+
+        private PolicyBonus[] SetUpPolicyBonus(Policy[] inputPolicies, FacebookBonusSettings inputSettings)
+        {
+            var resultPolicyBonus = new PolicyBonus[inputPolicies.Length];
+            int count = 0;
+            int total = 0;
+            int temp = 0;
+            var sortedPolicies = SortPoliciesWithCondition(inputSettings, inputPolicies);
+
+            foreach (Policy policy in sortedPolicies)
+            {
+                temp = CalculatePoints(policy.Premium, inputSettings.BonusPercentage);
+
+                var elementPolicyBonus = new PolicyBonus()
+                {
+                    PolicyNumber = policy.PolicyNumber,
+                    BonusInPoints = temp
+                };
+
+                if (IsTotalBiggerThanMaxiumPointAndMaxiumBiggerThan0(total + temp, inputSettings.MaximumBonus))
+                {
+                    temp = Convert.ToInt32(inputSettings.MaximumBonus) - total;
+                    total = Convert.ToInt32(inputSettings.MaximumBonus);
+                    elementPolicyBonus.BonusInPoints = temp;
+                }
+                else
+                {
+                    total += temp;
+                }
+                resultPolicyBonus[count] = elementPolicyBonus;
+                count++;
+            }
+
+            return resultPolicyBonus;
+        }
+
+        private bool IsTotalBiggerThanMaxiumPointAndMaxiumBiggerThan0(int total, decimal maximumBonus)
+        {
+            if (total >= maximumBonus && maximumBonus > 0)
+                return true;
+            return false;
+        }
+
+        private static IEnumerable<Policy> SortPoliciesWithCondition(FacebookBonusSettings settings, IEnumerable<Policy> policiesOfCustomer)
         {
             IPolicySortService policySortService = new DescendingOrderOfPoliciesNumber();
-            if (input.Setting.policySorter != null)
+            if (settings.policySorter != null)
             {
-                policySortService = input.Setting.policySorter;
+                policySortService = settings.policySorter;
             }
             policiesOfCustomer = policySortService.Sort(policiesOfCustomer);
             return policiesOfCustomer;
