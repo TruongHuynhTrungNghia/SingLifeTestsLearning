@@ -69,7 +69,6 @@
     <Compile Include="AscendingOrderOfPoliciesStartDateTests.cs" />
     <Compile Include="FacebookBonusCalculatorTests.cs" />
     <Compile Include="DescendingOrderOfPoliciesNumberTests.cs" />
-    <Compile Include="FacebookBonusTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
