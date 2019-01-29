@@ -52,16 +52,14 @@ namespace SingLife.FacebookShareBonus.Test
         {
             // Arrange
             const int expectedBonusPoint = 3;
-            var firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 133 };
-            var settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
-            var input = new FacebookBonusCalculationInput()
+            var facebookBonusCalculationinput = new FacebookBonusCalculationInput()
             {
-                PoliciesOfCustomer = new Policy[1] { firstPolicy },
-                Setting = settings
+                PoliciesOfCustomer = new Policy[] { new Policy() { PolicyNumber = "P001", Premium = 133 } },
+                Setting = new FacebookBonusSettings() { BonusPercentage = 3}
             };
 
             // Act
-            var facebookBonus = facebookBonusCalculator.Calculate(input);
+            var facebookBonus = facebookBonusCalculator.Calculate(facebookBonusCalculationinput);
 
             // Assert
             var actualBonusPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
@@ -79,11 +77,10 @@ namespace SingLife.FacebookShareBonus.Test
             var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
 
             // Assert
-            int actualFirstPolicypoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
-            int actualSecondPolicypoint = facebookBonus.PolicyBonuses[1].BonusInPoints;
-            Assert.That(actualFirstPolicypoint, Is.EqualTo(expectedFirstPolicyPoint));
-            Assert.That(actualSecondPolicypoint, Is.EqualTo(expectedSecondPolicyPoint));
-            //Assert.That(facebookBonus, Is.EqualTo(expectedFacebookBonus));
+            int actualFirstPolicyPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
+            int actualSecondPolicyPoint = facebookBonus.PolicyBonuses[1].BonusInPoints;
+            Assert.That(actualFirstPolicyPoint, Is.EqualTo(expectedFirstPolicyPoint));
+            Assert.That(actualSecondPolicyPoint, Is.EqualTo(expectedSecondPolicyPoint));
         }
 
         [Test]
@@ -118,10 +115,9 @@ namespace SingLife.FacebookShareBonus.Test
         {
             // Arrange
             const int maxiumBonus = 10;
-            var calculator = new FacebookBonusCalculator();
 
             // Act
-            var facebookBonus = calculator.Calculate(calculationInput);
+            var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
 
             // Assert
             int totalPoint = facebookBonus.Total;
