@@ -52,14 +52,10 @@ namespace SingLife.FacebookShareBonus.Test
         {
             // Arrange
             const int expectedBonusPoint = 3;
-            var facebookBonusCalculationinput = new FacebookBonusCalculationInput()
-            {
-                PoliciesOfCustomer = new Policy[] { new Policy() { PolicyNumber = "P001", Premium = 133 } },
-                Setting = new FacebookBonusSettings() { BonusPercentage = 3}
-            };
+            calculationInput.PoliciesOfCustomer[0] = new Policy() { Premium = 133 };
 
             // Act
-            var facebookBonus = facebookBonusCalculator.Calculate(facebookBonusCalculationinput);
+            var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
 
             // Assert
             var actualBonusPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
