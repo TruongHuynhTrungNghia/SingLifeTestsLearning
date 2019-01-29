@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SingLife.FacebookShareBonus.Model
 {
@@ -6,7 +7,7 @@ namespace SingLife.FacebookShareBonus.Model
     {
         private static void Main(string[] args)
         {
-            FacebookBonusCalculator facebookBonusCalculator = new FacebookBonusCalculator();
+            //FacebookBonusCalculator facebookBonusCalculator = new FacebookBonusCalculator();
             //Policy firstPolicy = new Policy();
             //firstPolicy.PolicyNumber = "P001";
             //firstPolicy.Premium = 200m;
@@ -19,27 +20,41 @@ namespace SingLife.FacebookShareBonus.Model
 
             //FacebookBonusCalculationInput input = SetupFaceBookCalculationInput(
             //        new Policy[] { firstPolicy, secondPolicy, thirdPolicy }, settingPercentage,Maxium);
-            Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 500 };
-            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3 };
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
+            //    Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 500 };
+            //    FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3 };
+            //    FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
+            //    {
+            //        PoliciesOfCustomer = new Policy[1] { firstPolicy },
+            //        Setting = settings
+            //    };
+
+            //    FacebookBonus facebookBonus = facebookBonusCalculator.Calculate(input);
+            //    int actualFirstPoints = facebookBonus.PolicyBonuses[0].BonusInPoints;
+            //    Console.WriteLine(actualFirstPoints);
+            //}
+
+            //private static FacebookBonusCalculationInput SetupFaceBookCalculationInput(Policy[] policies, float settings = 0f, decimal Maxium = 0)
+            //{
+            //    FacebookBonusCalculationInput input = new FacebookBonusCalculationInput();
+            //    input.PoliciesOfCustomer = policies;
+            //    input.Setting = new FacebookBonusSettings();
+            //    input.Setting.BonusPercentage = settings;
+            //    input.Setting.MaximumBonus = Maxium;
+            //    return input;
+            //}
+            var ascentSorting = new AscendingOrderOfPoliciesStartDate();
+            var secondPolicy = new Policy() { PolicyNumber = "P001", Premium = 500, StartDate = new DateTime(2016, 05, 06) };
+            var firstPolicy = new Policy() { PolicyNumber = "P002", Premium = 300, StartDate = new DateTime(2017, 08, 11) };
+            var thirdPolicy = new Policy() { PolicyNumber = "P003", Premium = 100, StartDate = new DateTime(2017, 09, 12) };
+
+            IEnumerable<Policy> Policies = new Policy[] { firstPolicy, secondPolicy, thirdPolicy };
+            Policies = ascentSorting.Sort(Policies);
+            
+            foreach(Policy p in Policies)
             {
-                PoliciesOfCustomer = new Policy[1] { firstPolicy },
-                Setting = settings
-            };
-
-            FacebookBonus facebookBonus = facebookBonusCalculator.Calculate(input);
-            int actualFirstPoints = facebookBonus.PolicyBonuses[0].BonusInPoints;
-            Console.WriteLine(actualFirstPoints);
-        }
-
-        private static FacebookBonusCalculationInput SetupFaceBookCalculationInput(Policy[] policies, float settings = 0f, decimal Maxium = 0)
-        {
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput();
-            input.PoliciesOfCustomer = policies;
-            input.Setting = new FacebookBonusSettings();
-            input.Setting.BonusPercentage = settings;
-            input.Setting.MaximumBonus = Maxium;
-            return input;
+                Console.WriteLine(p.StartDate);
+            }
+            Console.ReadLine();
         }
     }
 }

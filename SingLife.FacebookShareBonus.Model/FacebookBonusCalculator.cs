@@ -27,38 +27,37 @@ namespace SingLife.FacebookShareBonus.Model
             return facebookBonus;
         }
 
-        private FacebookBonus CalculateFacebookBonus(Policy[] inputPolicies, FacebookBonusSettings inputSettings)
+        private FacebookBonus CalculateFacebookBonus(Policy[] Policies, FacebookBonusSettings Settings)
         {
             var resultFacebookBonus = new FacebookBonus();
-            int inputPoliciesLength = inputPolicies.Length;
+            int inputPoliciesLength = Policies.Length;
             resultFacebookBonus.PolicyBonuses = new PolicyBonus[inputPoliciesLength];
-            resultFacebookBonus.PolicyBonuses = SetUpPolicyBonus(inputPolicies, inputSettings);
+            resultFacebookBonus.PolicyBonuses = ImplementPolicyBonus(Policies, Settings);
 
             return resultFacebookBonus;
         }
 
-        private PolicyBonus[] SetUpPolicyBonus(Policy[] inputPolicies, FacebookBonusSettings inputSettings)
+        private PolicyBonus[] ImplementPolicyBonus(Policy[] Policies, FacebookBonusSettings Settings)
         {
-            var resultPolicyBonus = new PolicyBonus[inputPolicies.Length];
+            var resultPolicyBonus = new PolicyBonus[Policies.Length];
             int count = 0;
             int total = 0;
             int temp = 0;
-            var sortedPolicies = SortPoliciesWithCondition(inputSettings, inputPolicies);
+            var sortedPolicies = SortPoliciesWithCondition(Settings, Policies);
 
             foreach (Policy policy in sortedPolicies)
             {
-                temp = CalculatePoints(policy.Premium, inputSettings.BonusPercentage);
-
+                temp = CalculatePoints(policy.Premium, Settings.BonusPercentage);
                 var elementPolicyBonus = new PolicyBonus()
                 {
                     PolicyNumber = policy.PolicyNumber,
                     BonusInPoints = temp
                 };
 
-                if (IsTotalBiggerThanMaxiumPointAndMaxiumBiggerThan0(total + temp, inputSettings.MaximumBonus))
+                if (IsTotalBiggerThanMaxiumPointAndIsMaxiumBiggerThan0(total + temp, Settings.MaximumBonus))
                 {
-                    temp = Convert.ToInt32(inputSettings.MaximumBonus) - total;
-                    total = Convert.ToInt32(inputSettings.MaximumBonus);
+                    temp = Convert.ToInt32(Settings.MaximumBonus) - total;
+                    total = Convert.ToInt32(Settings.MaximumBonus);
                     elementPolicyBonus.BonusInPoints = temp;
                 }
                 else
@@ -72,13 +71,6 @@ namespace SingLife.FacebookShareBonus.Model
             return resultPolicyBonus;
         }
 
-        private bool IsTotalBiggerThanMaxiumPointAndMaxiumBiggerThan0(int total, decimal maximumBonus)
-        {
-            if (total >= maximumBonus && maximumBonus > 0)
-                return true;
-            return false;
-        }
-
         private static IEnumerable<Policy> SortPoliciesWithCondition(FacebookBonusSettings settings, IEnumerable<Policy> policiesOfCustomer)
         {
             IPolicySortService policySortService = new DescendingOrderOfPoliciesNumber();
@@ -88,6 +80,13 @@ namespace SingLife.FacebookShareBonus.Model
             }
             policiesOfCustomer = policySortService.Sort(policiesOfCustomer);
             return policiesOfCustomer;
+        }
+
+        private bool IsTotalBiggerThanMaxiumPointAndIsMaxiumBiggerThan0(int total, decimal maximumBonus)
+        {
+            if (total >= maximumBonus && maximumBonus > 0)
+                return true;
+            return false;
         }
 
         private int CalculatePoints(decimal premium, float bonusPercentage)

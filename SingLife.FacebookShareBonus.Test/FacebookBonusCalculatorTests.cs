@@ -1,46 +1,64 @@
 ﻿using NUnit.Framework;
 using SingLife.FacebookShareBonus.Model;
+using System;
 
 namespace SingLife.FacebookShareBonus.Test
 {
     [TestFixture]
     internal class FacebookBonusCalculatorTests
     {
-        [Test]
-        public void Calculate_PremimumEquals200AndPercentageEquals2_PointEquals4()
+        private FacebookBonusCalculationInput calculationInput;
+        private FacebookBonusCalculator facebookBonusCalculator;
+
+        [SetUp]
+        public void SetUp()
         {
-            // Arrange
-            Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 100 };
-            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
+            var secondPolicy = new Policy() { PolicyNumber = "P001", Premium = 200, StartDate = new DateTime(2016, 05, 06) };
+            var firstPolicy = new Policy() { PolicyNumber = "P002", Premium = 100, StartDate = new DateTime(2017, 08, 11) };
+            var thirdPolicy = new Policy() { PolicyNumber = "P003", Premium = 100, StartDate = new DateTime(2017, 09, 12) };
+
+            var settings = new FacebookBonusSettings()
             {
-                PoliciesOfCustomer = new Policy[1] { firstPolicy },
+                BonusPercentage = 3,
+                MaximumBonus = 10,
+                policySorter = new AscendingOrderOfPoliciesStartDate()
+            };
+
+            calculationInput = new FacebookBonusCalculationInput()
+            {
+                PoliciesOfCustomer = new Policy[] { firstPolicy, secondPolicy, thirdPolicy },
                 Setting = settings
             };
-            const int expectedPoints = 3;
 
-            // Act
-            var calculator = new FacebookBonusCalculator();
-            var facebookBonus = calculator.Calculate(input);
-
-            // Assert
-            int actualBonusPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
-            Assert.That(actualBonusPoint, Is.EqualTo(expectedPoints));
+            facebookBonusCalculator = new FacebookBonusCalculator();
         }
 
         [Test]
-        public void Calculate_PonitsEquals3Point99_PointRoundDown3()
+        public void Calculate_GivenPremiumAndPercentage_IncentivePointsArePercentageOfPolicyPremium()
         {
             // Arrange
-            FacebookBonusCalculator facebookBonusCalculator = new FacebookBonusCalculator();
-            Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 133 };
-            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
+            const int expectedIncentivePoint = 6;
+
+            // Act
+            var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
+
+            // Assert
+            int actualBonusPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
+            Assert.That(actualBonusPoint, Is.EqualTo(expectedIncentivePoint));
+        }
+
+        [Test]
+        public void Calculate_GivenIncentivePoints_IncentivePointsAreRoundedDownToTheNearestInteger()
+        {
+            // Arrange
+            const int expectedBonusPoint = 3;
+            var firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 133 };
+            var settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
+            var input = new FacebookBonusCalculationInput()
             {
                 PoliciesOfCustomer = new Policy[1] { firstPolicy },
                 Setting = settings
             };
-            const int expectedBonusPoint = 3;
 
             // Act
             var facebookBonus = facebookBonusCalculator.Calculate(input);
@@ -51,90 +69,59 @@ namespace SingLife.FacebookShareBonus.Test
         }
 
         [Test]
-        public void Calculate_FirstPoilicyPremiumEquals100AndSecondPoilicyPremiumEquals150_PointsCalculateForEachPolicy()
+        public void Calculate_GivenCustomerPolicies_IncePointsAreCalculatedForEachPolicy()
         {
             // Arrange
-            Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 100 };
-            Policy secondPolicy = new Policy() { PolicyNumber = "P002", Premium = 150 };
-            FacebookBonusSettings settings = new FacebookBonusSettings() { BonusPercentage = 3, policySorter = new FakeSortOrder() };
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
-            {
-                PoliciesOfCustomer = new Policy[2] { firstPolicy, secondPolicy },
-                Setting = settings
-            };
-            var facebookBonusCalculator = new FacebookBonusCalculator();
-            const int expectedFirstPolicyPoint = 3;
-            const int expectedSecondPolicyPoint = 4;
+            const int expectedFirstPolicyPoint = 6;
+            const int expectedSecondPolicyPoint = 3;
 
             // Act
-            var facebookBonus = facebookBonusCalculator.Calculate(input);
+            var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
 
             // Assert
             int actualFirstPolicypoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
             int actualSecondPolicypoint = facebookBonus.PolicyBonuses[1].BonusInPoints;
             Assert.That(actualFirstPolicypoint, Is.EqualTo(expectedFirstPolicyPoint));
             Assert.That(actualSecondPolicypoint, Is.EqualTo(expectedSecondPolicyPoint));
+            //Assert.That(facebookBonus, Is.EqualTo(expectedFacebookBonus));
         }
 
         [Test]
-        public void Calculate_FirstPolicyNumberEqualsP001SecondPolicyNumberEqualsP002_DescentPolicyNumber()
+        public void Calculate_DescendingSortByPolicyNumbersIsSpecifiedInSettings_PoliciesAreSortedByDecendingOrderOfPolicyNumbers()
         {
-            // Arrange
-            Policy firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 500 };
-            Policy secondPolicy = new Policy() { PolicyNumber = "P002", Premium = 300 };
-
-            var settings = new FacebookBonusSettings()
-            {
-                BonusPercentage = 3,
-                MaximumBonus = 10,
-                policySorter = new DescendingOrderOfPoliciesNumber()
-            };
-
             var input = new FacebookBonusCalculationInput()
             {
-                PoliciesOfCustomer = new Policy[2] { firstPolicy, secondPolicy },
-                Setting = settings
+                PoliciesOfCustomer = new Policy[]
+                {
+                    new Policy { PolicyNumber = "P001", Premium = 500 },
+                    new Policy { PolicyNumber = "P002", Premium = 300 }
+                },
+                Setting = new FacebookBonusSettings
+                {
+                    policySorter = new DescendingOrderOfPoliciesNumber(),
+                    BonusPercentage = 3,
+                    MaximumBonus = 10
+                }
             };
 
             var facebookBonusCalculator = new FacebookBonusCalculator();
-            const string expectedFirstPolicyNumber = "P002";
-            const string expectedSecondPolicyNumber = "P001";
 
             // Act
             var facebookBonus = facebookBonusCalculator.Calculate(input);
 
             // Assert
-            string actualFirstPolicyNumber = facebookBonus.PolicyBonuses[0].PolicyNumber;
-            string actualSecondPolicyNumber = facebookBonus.PolicyBonuses[1].PolicyNumber;
-            Assert.That(actualFirstPolicyNumber, Is.EqualTo(expectedFirstPolicyNumber));
-            Assert.That(actualSecondPolicyNumber, Is.EqualTo(expectedSecondPolicyNumber));
+            Assert.That(facebookBonus.PolicyBonuses, Is.Ordered.Descending.By(nameof(PolicyBonus.PolicyNumber)));
         }
 
         [Test]
-        public void Calculate_MaxiumPointEquals10_TotalPointIsSmallerOrEqualMaxiumPoint()
+        public void Calculate_MaxiumIncentivePointInSettings_TotalPointIsSmallerOrEqualMaxiumPoint()
         {
             // Arrange
             const int maxiumBonus = 10;
-            Policy secondPolicy = new Policy() { PolicyNumber = "P001", Premium = 500, StartDate = new System.DateTime(12 / 05 / 2016) };
-            Policy firstPolicy = new Policy() { PolicyNumber = "P002", Premium = 300, StartDate = new System.DateTime(08 / 11 / 2017) };
-            Policy thirdPolicy = new Policy() { PolicyNumber = "P003", Premium = 100, StartDate = new System.DateTime(01 / 12 / 2017) };
-
-            FacebookBonusSettings settings = new FacebookBonusSettings()
-            {
-                BonusPercentage = 3,
-                MaximumBonus = maxiumBonus,
-                policySorter = new AscendingOrderOfPoliciesStartDate()
-            };
-
-            FacebookBonusCalculationInput input = new FacebookBonusCalculationInput()
-            {
-                PoliciesOfCustomer = new Policy[3] { firstPolicy, secondPolicy, thirdPolicy },
-                Setting = settings
-            };
             var calculator = new FacebookBonusCalculator();
 
             // Act
-            FacebookBonus facebookBonus = calculator.Calculate(input);
+            var facebookBonus = calculator.Calculate(calculationInput);
 
             // Assert
             int totalPoint = facebookBonus.Total;
