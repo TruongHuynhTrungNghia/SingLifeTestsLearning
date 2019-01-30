@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using SingLife.FacebookShareBonus.Model;
 using System;
+using System.Linq;
 
 namespace SingLife.FacebookShareBonus.Test
 {
@@ -66,17 +67,20 @@ namespace SingLife.FacebookShareBonus.Test
         public void Calculate_GivenCustomerPolicies_IncePointsAreCalculatedForEachPolicy()
         {
             // Arrange
-            const int expectedFirstPolicyPoint = 6;
-            const int expectedSecondPolicyPoint = 3;
+            var expectedPolicyBonus = new PolicyBonus() { PolicyNumber = "P001", BonusInPoints = 6 };
 
             // Act
             var facebookBonus = facebookBonusCalculator.Calculate(calculationInput);
 
             // Assert
-            int actualFirstPolicyPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
-            int actualSecondPolicyPoint = facebookBonus.PolicyBonuses[1].BonusInPoints;
-            Assert.That(actualFirstPolicyPoint, Is.EqualTo(expectedFirstPolicyPoint));
-            Assert.That(actualSecondPolicyPoint, Is.EqualTo(expectedSecondPolicyPoint));
+            //int actualFirstPolicyPoint = facebookBonus.PolicyBonuses[0].BonusInPoints;
+            //int actualSecondPolicyPoint = facebookBonus.PolicyBonuses[1].BonusInPoints;
+            //Assert.That(actualFirstPolicyPoint, Is.EqualTo(expectedFirstPolicyPoint));
+            //Assert.That(actualSecondPolicyPoint, Is.EqualTo(expectedSecondPolicyPoint));
+            // Assert.That(facebookBonus.PolicyBonuses.Any(p => p == expectedPolicyBonus));
+            //Assert.That(facebookBonus.PolicyBonuses, Is.Co)
+            //Assert.Contains(expectedPolicyBonus, facebookBonus.PolicyBonuses);
+            Assert.That(facebookBonus.PolicyBonuses.Any(p => p.PolicyNumber == expectedPolicyBonus.PolicyNumber && p.BonusInPoints == expectedPolicyBonus.BonusInPoints));
         }
 
         [Test]
