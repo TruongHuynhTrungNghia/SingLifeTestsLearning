@@ -6,6 +6,6 @@
 
         public decimal MaximumBonus { get; set; }
 
-        public IPolicySortService policySorter { get; set; }
+        public IPolicySortService PolicySorter { get; set; }
     }
 }

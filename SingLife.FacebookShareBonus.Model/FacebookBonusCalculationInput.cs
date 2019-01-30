@@ -13,6 +13,6 @@
         // <summary>
         // FaceBook bonus Calculation Settings.
         // </summary>
-        public FacebookBonusSettings Setting { get; set; }
+        public FacebookBonusSettings Settings { get; set; }
     }
 }

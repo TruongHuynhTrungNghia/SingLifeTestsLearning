@@ -45,8 +45,8 @@ namespace SingLife.FacebookShareBonus.Test
             // Arrange
             var input = CreateCalculationInputWith3Policies();
             var facebookBonusCalculator = new FacebookBonusCalculator();
-            int expectedFirstPolicyBonus = 6;
-            int expectedSecondPolicyBonus = 3;
+            const int expectedFirstPolicyBonus = 6;
+            const int expectedSecondPolicyBonus = 3;
 
             // Act
             var facebookBonus = facebookBonusCalculator.Calculate(input);
@@ -62,7 +62,8 @@ namespace SingLife.FacebookShareBonus.Test
         public void Calculate_DescendingSortByPolicyNumbersIsSpecifiedInSettings_PoliciesAreSortedByDecendingOrderOfPolicyNumbers()
         {
             // Arrange
-            var input = CreateCalculationInputWith3PoliciesAndDescendingPoliciesSpecifiedInSettings();
+            var input = CreateCalculationInputWith3Policies();
+            input.Settings.PolicySorter = new DescendingOrderOfPoliciesNumber();
             var facebookBonusCalculator = new FacebookBonusCalculator();
 
             // Act
@@ -73,7 +74,7 @@ namespace SingLife.FacebookShareBonus.Test
         }
 
         [Test]
-        public void Calculate_MaxiumIncentivePointInSettings_TotalPointIsSmallerOrEqualToMaxiumPoint()
+        public void Calculate_BonusLimitIsSpecifiedInFacebookBonusSettings_TotalPointsShouldNotExceedTheLimit()
         {
             // Arrange
             var input = CreateCalculationInputWith3Policies();
@@ -89,7 +90,7 @@ namespace SingLife.FacebookShareBonus.Test
         }
 
         [Test]
-        public void Calculate_MaxiumIncentivePointInSettings_BonusPointsAreDistributedCorrectly()
+        public void Calculate_BonusLimitIsSpecifiedInFacebookBonusSettings_BonusPointsAreDistributedCorrectly()
         {
             // Arrange
             var input = CreateCalculationInputWith3Policies();
@@ -119,13 +120,11 @@ namespace SingLife.FacebookShareBonus.Test
                 BonusPercentage = percentage,
             };
 
-            var calculationInput = new FacebookBonusCalculationInput()
+            return new FacebookBonusCalculationInput()
             {
                 PoliciesOfCustomer = new Policy[] { policy },
-                Setting = settings
+                Settings = settings
             };
-
-            return calculationInput;
         }
 
         private FacebookBonusCalculationInput CreateCalculationInputWith3Policies()
@@ -138,38 +137,14 @@ namespace SingLife.FacebookShareBonus.Test
             {
                 BonusPercentage = 3,
                 MaximumBonus = 10,
-                policySorter = new FakeSortOrder()
+                PolicySorter = new FakeSortOrder()
             };
 
-            var calculationInput = new FacebookBonusCalculationInput()
+            return new FacebookBonusCalculationInput()
             {
                 PoliciesOfCustomer = new Policy[] { firstPolicy, secondPolicy, thirdPolicy },
-                Setting = settings
+                Settings = settings
             };
-
-            return calculationInput;
-        }
-
-        private FacebookBonusCalculationInput CreateCalculationInputWith3PoliciesAndDescendingPoliciesSpecifiedInSettings()
-        {
-            var firstPolicy = new Policy() { PolicyNumber = "P001", Premium = 200, StartDate = new DateTime(2016, 05, 06) };
-            var secondPolicy = new Policy() { PolicyNumber = "P002", Premium = 100, StartDate = new DateTime(2017, 08, 11) };
-            var thirdPolicy = new Policy() { PolicyNumber = "P003", Premium = 100, StartDate = new DateTime(2017, 09, 12) };
-
-            var settings = new FacebookBonusSettings()
-            {
-                BonusPercentage = 3,
-                MaximumBonus = 10,
-                policySorter = new DescendingOrderOfPoliciesNumber()
-            };
-
-            var calculationInput = new FacebookBonusCalculationInput()
-            {
-                PoliciesOfCustomer = new Policy[] { firstPolicy, secondPolicy, thirdPolicy },
-                Setting = settings
-            };
-
-            return calculationInput;
         }
     }
 }

@@ -16,13 +16,13 @@ namespace SingLife.FacebookShareBonus.Model
             {
                 BonusPercentage = 3,
                 MaximumBonus = 10,
-                policySorter = new AscendingOrderOfPoliciesStartDate()
+                PolicySorter = new AscendingOrderOfPoliciesStartDate()
             };
 
             var calculationInput = new FacebookBonusCalculationInput()
             {
                 PoliciesOfCustomer = new Policy[] { firstPolicy, secondPolicy, thirdPolicy },
-                Setting = settings
+                Settings = settings
             };
 
             var facebookBonusCalculator = new FacebookBonusCalculator();

@@ -11,15 +11,15 @@ namespace SingLife.FacebookShareBonus.Model
     ///</summary>
     public class FacebookBonusCalculator
     {
-        // <summary>
-        // Calculates the bonus
-        // </summary>
-        // <param name = "input">A parameter object representing inputs to the calculation.</param>
-        // <returns> A <see cref="FacebookBonus"/> object.</returns>
+        ///<summary>
+        /// Calculates the bonus.
+        ///</summary>
+        ///<param name="input">A parameter object representing inputs to the calculation.</param>
+        ///<returns> A <see cref="FacebookBonus"/> object.</returns>
         public FacebookBonus Calculate(FacebookBonusCalculationInput input)
         {
             var inputPolicies = input.PoliciesOfCustomer;
-            var inputSettings = input.Setting;
+            var inputSettings = input.Settings;
 
             var facebookBonus = new FacebookBonus();
             facebookBonus = CalculateFacebookBonus(inputPolicies, inputSettings);
@@ -27,12 +27,12 @@ namespace SingLife.FacebookShareBonus.Model
             return facebookBonus;
         }
 
-        private FacebookBonus CalculateFacebookBonus(Policy[] Policies, FacebookBonusSettings Settings)
+        private FacebookBonus CalculateFacebookBonus(Policy[] policies, FacebookBonusSettings settings)
         {
             var resultFacebookBonus = new FacebookBonus();
-            int inputPoliciesLength = Policies.Length;
+            int inputPoliciesLength = policies.Length;
             resultFacebookBonus.PolicyBonuses = new PolicyBonus[inputPoliciesLength];
-            resultFacebookBonus.PolicyBonuses = CalculatePolicyBonus(Policies, Settings);
+            resultFacebookBonus.PolicyBonuses = CalculatePolicyBonus(policies, settings);
 
             return resultFacebookBonus;
         }
@@ -43,8 +43,7 @@ namespace SingLife.FacebookShareBonus.Model
             int count = 0;
             int total = 0;
             int temp = 0;
-            var sortedPolicies = SortPoliciesWithConditionSpecifiedInSettings(policies, settings);
-            foreach (Policy policy in sortedPolicies)
+            foreach (Policy policy in SortPoliciesWithConditionSpecifiedInSettings(policies, settings))
             {
                 temp = CalculateBonusIntensivePoints(policy.Premium, settings.BonusPercentage);
                 var elementPolicyBonus = new PolicyBonus()
@@ -72,9 +71,9 @@ namespace SingLife.FacebookShareBonus.Model
         private static IEnumerable<Policy> SortPoliciesWithConditionSpecifiedInSettings(IEnumerable<Policy> policiesOfCustomer, FacebookBonusSettings settings)
         {
             IPolicySortService policySortService = new DescendingOrderOfPoliciesNumber();
-            if (settings.policySorter != null)
+            if (settings.PolicySorter != null)
             {
-                policySortService = settings.policySorter;
+                policySortService = settings.PolicySorter;
             }
             policiesOfCustomer = policySortService.Sort(policiesOfCustomer);
             return policiesOfCustomer;
